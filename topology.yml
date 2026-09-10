@@ -1,0 +1,128 @@
+# Network Topology Definition for DevNet Project
+# Defines two sites (LAN A and LAN B) connected by routers with management network
+
+management_network:
+  name: "Management Network"
+  subnet: "192.168.100.0/24"
+  gateway: "192.168.100.1"
+  devices:
+    - name: "NAT1"
+      type: "nat"
+      image: "gns3/qemu:latest"
+      management_ip: "192.168.100.1"
+    - name: "HOST_MGMT"
+      type: "qemu"
+      image: "gns3/qemu:latest"
+      management_ip: "192.168.100.10"
+      ram: 512
+      console_type: "telnet"
+      console_port: 5000
+
+lan_a:
+  name: "LAN A"
+  subnet: "192.168.1.0/24"
+  devices:
+    - name: "PC1"
+      type: "qemu"
+      image: "gns3/qemu:latest"
+      management_ip: "192.168.100.11"
+      ram: 256
+      console_type: "telnet"
+      console_port: 5001
+    - name: "SW1"
+      type: "ethernet_switch"
+      management_ip: "192.168.100.12"
+      ports: 4
+    - name: "R1"
+      type: "qemu"
+      image: "gns3/qemu:latest"
+      management_ip: "192.168.100.13"
+      ram: 512
+      console_type: "telnet"
+      console_port: 5002
+      interfaces:
+        - name: "Gig0/0"
+          ip_address: "192.168.1.1"
+          subnet_mask: "255.255.255.0"
+        - name: "Gig0/1"
+          ip_address: "10.0.0.1"
+          subnet_mask: "255.255.255.252"
+
+lan_b:
+  name: "LAN B"
+  subnet: "192.168.2.0/24"
+  devices:
+    - name: "PC2"
+      type: "qemu"
+      image: "gns3/qemu:latest"
+      management_ip: "192.168.100.14"
+      ram: 256
+      console_type: "telnet"
+      console_port: 5003
+    - name: "SW2"
+      type: "ethernet_switch"
+      management_ip: "192.168.100.15"
+      ports: 4
+    - name: "R2"
+      type: "qemu"
+      image: "gns3/qemu:latest"
+      management_ip: "192.168.100.16"
+      ram: 512
+      console_type: "telnet"
+      console_port: 5004
+      interfaces:
+        - name: "Gig0/0"
+          ip_address: "192.168.2.1"
+          subnet_mask: "255.255.255.0"
+        - name: "Gig0/1"
+          ip_address: "10.0.0.2"
+          subnet_mask: "255.255.255.252"
+
+connections:
+  # LAN A connections
+  - source: "PC1"
+    target: "SW1"
+    source_interface: "eth0"
+    target_interface: "eth0"
+  - source: "SW1"
+    target: "R1"
+    source_interface: "eth1"
+    target_interface: "Gig0/0"
+
+  # Inter-site routing
+  - source: "R1"
+    target: "R2"
+    source_interface: "Gig0/1"
+    target_interface: "Gig0/1"
+
+  # LAN B connections
+  - source: "R2"
+    target: "SW2"
+    source_interface: "Gig0/0"
+    target_interface: "eth0"
+  - source: "SW2"
+    target: "PC2"
+    source_interface: "eth1"
+    target_interface: "eth0"
+
+  # Management network connections
+  - source: "NAT1"
+    target: "HOST_MGMT"
+    source_interface: "eth0"
+    target_interface: "eth0"
+  - source: "HOST_MGMT"
+    target: "R1"
+    source_interface: "eth1"
+    target_interface: "eth0"
+  - source: "HOST_MGMT"
+    target: "R2"
+    source_interface: "eth2"
+    target_interface: "eth0"
+  - source: "HOST_MGMT"
+    target: "SW1"
+    source_interface: "eth3"
+    target_interface: "eth0"
+  - source: "HOST_MGMT"
+    target: "SW2"
+    source_interface: "eth4"
+    target_interface: "eth0"
