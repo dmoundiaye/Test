@@ -1,7 +1,7 @@
 """Validation endpoints."""
 
 from typing import List
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from app.models.database import get_db
 from app.models.topology import Topology

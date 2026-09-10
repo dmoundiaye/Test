@@ -3,7 +3,7 @@
 import logging
 from typing import Dict, List, Optional
 from netmiko import ConnectHandler
-from netmiko.ssh_exception import NetmikoTimeoutException, NetmikoAuthenticationException
+from netmiko.exceptions import NetmikoTimeoutException, NetmikoAuthenticationException
 from app.config import settings
 
 logger = logging.getLogger(__name__)

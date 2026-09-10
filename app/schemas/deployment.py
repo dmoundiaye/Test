@@ -1,7 +1,9 @@
+
 """Schemas for deployment and validation results."""
 
 from typing import List, Optional
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel
 
 
 class NodeStatus(BaseModel):
@@ -17,11 +19,23 @@ class LinkStatus(BaseModel):
     details: Optional[str] = None
 
 
+class ValidationResult(BaseModel):
+    test_name: str
+    status: str  # SUCCESS, FAILED
+    details: Optional[str] = None
+
+
 class ValidationReport(BaseModel):
     topology_name: str
     generated_at: str
     tests: List[ValidationResult]
     final_status: str  # SUCCESS, FAILED
+
+
+class DeploymentRequest(BaseModel):
+    topology_id: int
+    project_name: Optional[str] = None
+    auto_start: bool = True
 
 
 class ReportGenerationRequest(BaseModel):
