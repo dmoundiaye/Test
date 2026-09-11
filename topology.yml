@@ -8,10 +8,12 @@ management_network:
   devices:
     - name: "NAT1"
       type: "nat"
+      device_type: "nat"
       image: "gns3/qemu:latest"
       management_ip: "192.168.100.1"
     - name: "HOST_MGMT"
       type: "qemu"
+      device_type: "qemu"
       image: "gns3/qemu:latest"
       management_ip: "192.168.100.10"
       ram: 512
@@ -24,6 +26,7 @@ lan_a:
   devices:
     - name: "PC1"
       type: "qemu"
+      device_type: "vpcs"
       image: "gns3/qemu:latest"
       management_ip: "192.168.100.11"
       ram: 256
@@ -31,10 +34,12 @@ lan_a:
       console_port: 5001
     - name: "SW1"
       type: "ethernet_switch"
+      device_type: "ethernet_switch"
       management_ip: "192.168.100.12"
       ports: 4
     - name: "R1"
       type: "qemu"
+      device_type: "cisco_ios"
       image: "gns3/qemu:latest"
       management_ip: "192.168.100.13"
       ram: 512
@@ -54,6 +59,7 @@ lan_b:
   devices:
     - name: "PC2"
       type: "qemu"
+      device_type: "vpcs"
       image: "gns3/qemu:latest"
       management_ip: "192.168.100.14"
       ram: 256
@@ -61,10 +67,12 @@ lan_b:
       console_port: 5003
     - name: "SW2"
       type: "ethernet_switch"
+      device_type: "ethernet_switch"
       management_ip: "192.168.100.15"
       ports: 4
     - name: "R2"
       type: "qemu"
+      device_type: "cisco_ios"
       image: "gns3/qemu:latest"
       management_ip: "192.168.100.16"
       ram: 512

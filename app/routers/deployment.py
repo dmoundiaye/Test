@@ -21,7 +21,13 @@ def run_deployment(topology_id: int, request: DeploymentRequest, db: Session = D
         )
 
     try:
-        results = deploy_topology(topology_id, request.deploy, request.configure)
+        # CORRECTION : On extrait proprement auto_start au lieu d'appeler request.deploy
+        auto_start = getattr(request, "auto_start", True)
+
+        # Si votre fonction deploy_topology prend 2 paramètres booléens (ex: deploy et configure)
+        # passez-lui True et auto_start :
+        results = deploy_topology(topology_id, True, auto_start)
+        
         return {
             "message": "Deployment completed",
             "topology_id": topology_id,

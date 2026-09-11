@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 Base.metadata.create_all(bind=engine)
 
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""

@@ -15,6 +15,7 @@ from app.schemas.topology import (
     InterfaceSchema,
 )
 from app.schemas.deployment import DeploymentRequest
+from app.services.deployment_service import deploy_topology
 
 router = APIRouter(prefix="/api/topology", tags=["topology"])
 
@@ -184,9 +185,16 @@ def add_device(topology_id: int, device: DeviceSchema, db: Session = Depends(get
     )
 
 
+# Assurez-vous d'avoir cet import en haut du fichier topology.py :
+# from app.services.deployment_service import deploy_topology
+
 @router.post("/{topology_id}/deploy")
-def deploy_topology(topology_id: int, request: DeploymentRequest, db: Session = Depends(get_db)):
-    """Trigger deployment of a topology to GNS3 and device configuration."""
+def deploy_topology_endpoint(
+    topology_id: int, 
+    request: DeploymentRequest, 
+    db: Session = Depends(get_db)
+):
+    """Deploy topology to GNS3."""
     topology = db.query(Topology).filter(Topology.id == topology_id).first()
     if not topology:
         raise HTTPException(
@@ -194,19 +202,35 @@ def deploy_topology(topology_id: int, request: DeploymentRequest, db: Session = 
             detail=f"Topology with ID {topology_id} not found",
         )
 
-    if topology.status not in ["draft", "failed"]:
+    if topology.status in ["deploying", "deployed"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Topology is already {topology.status} and cannot be redeployed",
+            detail="Topology is already deploying and cannot be redeployed",
         )
 
-    # This will be implemented in services
-    topology.status = "deploying"
-    db.commit()
+    try:
+        # Extraire auto_start de manière sécurisée
+        auto_start = getattr(request, "auto_start", True)
 
-    return {
-        "message": f"Deployment started for topology {topology_id}",
-        "topology_id": topology_id,
-        "deploy": request.deploy,
-        "configure": request.configure,
-    }
+        # Mise à jour du statut avant traitement
+        topology.status = "deploying"
+        db.commit()
+
+        # REMPLACEMENT DE deploy_service.deploy PAR deploy_topology :
+        results = deploy_topology(topology_id, True, auto_start)
+
+        topology.status = "deployed"
+        db.commit()
+
+        return {
+            "message": "Deployment completed successfully",
+            "topology_id": topology_id,
+            "results": results,
+        }
+    except Exception as e:
+        topology.status = "failed"
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Deployment failed: {str(e)}",
+        )
