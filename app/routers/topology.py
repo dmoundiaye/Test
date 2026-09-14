@@ -217,7 +217,7 @@ def deploy_topology_endpoint(
         db.commit()
 
         # REMPLACEMENT DE deploy_service.deploy PAR deploy_topology :
-        results = deploy_topology(topology_id, True, auto_start)
+        results = deploy_topology(topology_id, deploy=True, configure=auto_start, db=db)
 
         topology.status = "deployed"
         db.commit()

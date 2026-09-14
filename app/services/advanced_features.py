@@ -4,12 +4,12 @@ import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 import ipaddress
-import json
 
 from app.models.database import get_db
 from app.models.topology import Topology, Device, Connection, Interface
 from app.schemas.topology import TopologySchema, DeviceSchema, ConnectionSchema
 from app.services.netmiko_service import NetmikoService
+from app.utils.yaml import parse_topology_yaml
 
 logger = logging.getLogger(__name__)
 netmiko = NetmikoService()
@@ -149,7 +149,7 @@ def detect_inconsistencies(topology_id: int, db) -> Dict[str, Any]:
 
     # Check for devices in DB but not in YAML
     try:
-        data = json.loads(topology.yaml_content)
+        data = parse_topology_yaml(topology.yaml_content)
         yaml_devices = set()
         for section in ["management_network", "lan_a", "lan_b"]:
             for device in data.get(section, {}).get("devices", []):
@@ -209,7 +209,7 @@ def generate_schema_diagram(topology_id: int, db) -> Dict[str, Any]:
         raise ValueError(f"Topology with ID {topology_id} not found")
 
     try:
-        data = json.loads(topology.yaml_content)
+        data = parse_topology_yaml(topology.yaml_content)
     except Exception as e:
         raise ValueError(f"Could not parse topology YAML: {e}")
 

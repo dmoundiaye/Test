@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from app.models.database import get_db
 from app.models.topology import Topology
+from app.utils.yaml import parse_topology_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +42,8 @@ def generate_markdown_report(topology_id: int, db) -> str:
     # Parse YAML for devices and connections
     import json
     try:
-        topo_data = json.loads(topology.yaml_content)
-    except json.JSONDecodeError:
+        topo_data = parse_topology_yaml(topology.yaml_content)
+    except (json.JSONDecodeError, ValueError):
         topo_data = {}
 
     # Devices

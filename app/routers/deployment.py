@@ -13,6 +13,8 @@ router = APIRouter(prefix="/api/deploy", tags=["deployment"])
 @router.post("/{topology_id}/run")
 def run_deployment(topology_id: int, request: DeploymentRequest, db: Session = Depends(get_db)):
     """Trigger end-to-end deployment."""
+    print("DEBUG DB TYPE:", type(db))
+    print("DEBUG DB HAS QUERY:", hasattr(db, "query"))
     topology = db.query(Topology).filter(Topology.id == topology_id).first()
     if not topology:
         raise HTTPException(
@@ -26,7 +28,7 @@ def run_deployment(topology_id: int, request: DeploymentRequest, db: Session = D
 
         # Si votre fonction deploy_topology prend 2 paramètres booléens (ex: deploy et configure)
         # passez-lui True et auto_start :
-        results = deploy_topology(topology_id, True, auto_start)
+        results = deploy_topology(topology_id, deploy=True, configure=auto_start, db=db)
         
         return {
             "message": "Deployment completed",
